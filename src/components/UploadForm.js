@@ -5,6 +5,7 @@ import { BACKEND_URI } from "../config/constants";
 const UploadForm = ({ getAllMedias }) => {
   const [name, setName] = useState("");
   const [videos, setVideos] = useState([]);
+  const [uploaded, setUploaded] = useState(null);
 
   const hadleSubmit = (e) => {
     e.preventDefault();
@@ -17,7 +18,11 @@ const UploadForm = ({ getAllMedias }) => {
     formdata.append("name", name);
 
     axios
-      .post(`${BACKEND_URI}/api/v1/media/create`, formdata)
+      .post(`${BACKEND_URI}/api/v1/media/create`, formdata, {
+        onUploadProgress: (data) => {
+          setUploaded(Math.round((data.loaded / data.total) * 100));
+        },
+      })
       .then((success) => {
         getAllMedias();
         alert("Submitted successfully");
@@ -55,6 +60,21 @@ const UploadForm = ({ getAllMedias }) => {
             }}
           />
         </div>
+
+        {uploaded && (
+          <div className="progress mt-2">
+            <div
+              className="progress-bar"
+              role="progressbar"
+              aria-valuenow={uploaded}
+              aria-valuemin="0"
+              aria-valuemax="100"
+              style={{ width: `${uploaded}%` }}
+            >
+              {`${uploaded}%`}
+            </div>
+          </div>
+        )}
 
         <button type="submit" className="btn btn-primary mt-2">
           Submit
